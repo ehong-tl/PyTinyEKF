@@ -56,6 +56,8 @@ y_f = []
 v_f = []
 py = []
 pv = []
+gy = []
+gv = []
 for i in range(len(y)):
     t = float(time[i]) - prev
     prev = float(time[i])
@@ -63,23 +65,40 @@ for i in range(len(y)):
     update_eq(ekf, t) # Update matrix
     ekf.step(z) # EKF cycle
     x_filtered = ekf.getX() # Get filtered state
+    p_filtered = ekf.getP() # Get filtered covariance
+    g_filtered = ekf.getG() # Get Kalman gain
     y_f.append(x_filtered[0])
     v_f.append(x_filtered[1])
-    py.append(ekf.getP()[0])
-    pv.append(ekf.getP()[3])
+    py.append(p_filtered[0])
+    pv.append(p_filtered[3])
+    gy.append(g_filtered[0])
+    gv.append(g_filtered[1])
 
 yf = np.array(y_f)
-plt.plot(time,y_f,'r')
-plt.plot(time,y,'g')
-plt.plot(time,y1,'b')
-plt.plot(time,yr,'black')
+plt.plot(time,y_f,'r',label='EKF')
+plt.plot(time,y,'g',label='Raw 1')
+plt.plot(time,y1,'b',label='Raw 2')
+plt.plot(time,yr,'black',label='Truth')
+plt.legend()
+plt.title('Displacement')
 plt.figure()
-plt.plot(time,v_f,'r')
-plt.plot(time,v,'g')
-plt.plot(time,vr,'black')
+plt.plot(time,v_f,'r',label='EKF')
+plt.plot(time,v,'g',label='Raw')
+plt.plot(time,vr,'black',label='Truth')
+plt.legend()
+plt.title('Velocity')
 plt.figure()
 py = np.array(py)
 pv = np.array(pv)
-plt.plot(time, py, 'r')
-plt.plot(time, pv, 'g')
+plt.plot(time, py, 'r',label='Displacement')
+plt.plot(time, pv, 'g',label='Velocity')
+plt.legend()
+plt.title('Covariance')
+plt.figure()
+gy = np.array(gy)
+gv = np.array(gv)
+plt.plot(time, gy, 'r',label='Displacement')
+plt.plot(time, gv, 'g',label='Velocity')
+plt.legend()
+plt.title('Kalman Gain')
 plt.show()
