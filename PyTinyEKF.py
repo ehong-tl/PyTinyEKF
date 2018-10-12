@@ -8,18 +8,19 @@ def choldc1(a, p, n):
                 summ -= a[i*n+k] * a[j*n+k]
             if i == j:
                 if summ <= 0:
-                    return 1
+                    return 1, a, p
                 p[i] = math.sqrt(summ)
             else:
                 a[j*n+i] = summ / p[i]
-    return 0
+    return 0, a, p
 
 def choldcs1(A, a, p, n):
     for i in range(n):
         for j in range(n):
             a[i*n+j] = A[i*n+j]
-    if choldc1(a,p,n):
-        return 1
+    rtn, a, p = choldc1(a,p,n)
+    if rtn:
+        return 1, A, a, p
     for i in range(n):
         a[i*n+i] = 1 / p[i]
         for j in range(i+1,n):
@@ -27,11 +28,12 @@ def choldcs1(A, a, p, n):
             for k in range(i,j):
                 summ -= a[j*n+k] * a[k*n+i]
             a[j*n+i] = summ / p[j]
-    return 0
+    return 0, A, a, p
 
 def cholsl(A, a, p, n):
-    if choldcs1(A, a, p, n):
-        return 1
+    rtn, A, a, p = choldcs1(A, a, p, n)
+    if rtn:
+        return 1, a
     for i in range(n):
         for j in range(i+1,n):
             a[i*n+j] = 0.0
@@ -45,7 +47,7 @@ def cholsl(A, a, p, n):
     for i in range(n):
         for j in range(i):
             a[i*n+j] = a[j*n+i]
-    return 0
+    return 0, a
 
 def zeros(m, n):
     a = []
@@ -190,7 +192,8 @@ class ekf(model):
         self.tmp2 = mulmat(self.H_f, self.Pp, self.tmp2, self.m, self.n, self.n)
         self.tmp3 = mulmat(self.tmp2, self.Ht, self.tmp3, self.m, self.n, self.m)
         self.tmp3 = accum(self.tmp3, self.R_f, self.m, self.m)
-        if cholsl(self.tmp3, self.tmp4, self.tmp5, self.m):
+        rtn, self.tmp4 = cholsl(self.tmp3, self.tmp4, self.tmp5, self.m)
+        if rtn:
             return 1
         self.G = mulmat(self.tmp1, self.tmp4, self.G, self.n, self.m, self.m)
         
