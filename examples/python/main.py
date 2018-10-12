@@ -56,7 +56,8 @@ y_f = []
 v_f = []
 py = []
 pv = []
-gy = []
+gy1 = []
+gy2 = []
 gv = []
 for i in range(len(y)):
     t = float(time[i]) - prev
@@ -71,8 +72,9 @@ for i in range(len(y)):
     v_f.append(x_filtered[1])
     py.append(p_filtered[0])
     pv.append(p_filtered[3])
-    gy.append(g_filtered[0])
-    gv.append(g_filtered[1])
+    gy1.append(g_filtered[0])
+    gy2.append(g_filtered[1])
+    gv.append(g_filtered[5])
 
 yf = np.array(y_f)
 plt.plot(time,y_f,'r',label='EKF')
@@ -95,10 +97,12 @@ plt.plot(time, pv, 'g',label='Velocity')
 plt.legend()
 plt.title('Covariance')
 plt.figure()
-gy = np.array(gy)
+gy1 = np.array(gy1)
+gy2 = np.array(gy2)
 gv = np.array(gv)
-plt.plot(time, gy, 'r',label='Displacement')
-plt.plot(time, gv, 'g',label='Velocity')
+plt.plot(time, gy1, 'r',label='Displacement 1')
+plt.plot(time, gy2, 'g',label='Displacement 2')
+plt.plot(time, gv, 'b',label='Velocity')
 plt.legend()
 plt.title('Kalman Gain')
 plt.show()
