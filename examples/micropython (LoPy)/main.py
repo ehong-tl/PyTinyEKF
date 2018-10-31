@@ -28,16 +28,17 @@ def update_eq(cls, t):
     # Set m x m R matrix
     cls.setR(0,0,0.1)
 
-    cls.flatten()
-
 n = 2 # number of states
 m = 1 # number of observations
 ekf = ekf(n,m)
 
-# Set n x n P matrix
+# Set initial state n x 1 X matrix
+ekf.setX(0,-70)
+ekf.setX(1,0)
+
+# Set initial covariance n x n P matrix
 ekf.setP(0,0,100)
 ekf.setP(1,1,100)
-ekf.flattenP()
 
 # Setup bluetooth to scan bluetooth devices
 bt = Bluetooth()
@@ -54,8 +55,7 @@ while True:
                     now =  utime.ticks_ms()
                     t = utime.ticks_diff(now, prev)/1000
                     prev = now
-                    update_eq(ekf, t) # Update matrix
                     z = [ad.rssi] # Sensor observations
-                    ekf.step(z) # EKF cycle
+                    ekf.step(z, update_eq, ekf, t) # EKF cycle
                     x_filtered = ekf.getX() # Get filtered states
                     print(x_filtered[0], ',', z[0])
