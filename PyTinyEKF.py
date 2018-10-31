@@ -132,6 +132,9 @@ class model:
                 self.H[i].append(0.0)
             for k in range(m):
                 self.R[i].append(0.0)
+                
+    def setX(self, i, val):
+        self.x[i] = val
 
     def setfx(self, i, val):
         self.fx[i] = val
@@ -154,15 +157,6 @@ class model:
     def setR(self, i, j, val):
         self.R[i][j] = val
 
-    def flatten(self):
-        self.F_f = sum(self.F, [])
-        self.H_f = sum(self.H, [])
-        self.Q_f = sum(self.Q, [])
-        self.R_f = sum(self.R, [])
-
-    def flattenP(self):
-        self.P_f = sum(self.P, [])
-
 class ekf(model):
 
     def __init__(self, n, m):
@@ -179,6 +173,16 @@ class ekf(model):
         self.tmp3 = zeros(m, m)
         self.tmp4 = zeros(m, m)
         self.tmp5 = zeros(m, m)
+
+    def flatten(self):
+        self.F_f = sum(self.F, [])
+        self.H_f = sum(self.H, [])
+        self.Q_f = sum(self.Q, [])
+        self.R_f = sum(self.R, [])
+        try:
+            self.P_f = sum(self.P, [])
+        except TypeError:
+            pass
 
     def predict(self):
         self.tmp0 = mulmat(self.F_f, self.P_f, self.tmp0, self.n, self.n, self.n)
@@ -206,7 +210,9 @@ class ekf(model):
         self.tmp0 = mat_addeye(self.tmp0, self.n)
         self.P = mulmat(self.tmp0, self.Pp, self.P_f, self.n, self.n, self.n)
 
-    def step(self, z):
+    def step(self, z, update_func, *args):
+        update_func(*args)
+        self.flatten()
         self.z = z
         self.predict()
         self.correct()
